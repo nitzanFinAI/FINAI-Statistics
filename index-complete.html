@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinAI - מצגת אינטראקטיבית</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* FinAI Colors */
+        :root {
+            --dark-blue: #001F3F;
+            --turquoise: #00A8E8;
+            --white: #FFFFFF;
+            --light-gray: #F2F5F7;
+            --text-primary: #001F3F;
+            --text-secondary: #5A6C7D;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--light-gray);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* View Container */
+        .view-container {
+            display: block;
+        }
+
+        /* Presentation Styles */
+        .presentation-container {
+            max-width: 1500px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .slide-navigation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .nav-arrow {
+            width: 50px;
+            height: 50px;
+            border: none;
+            background: var(--turquoise);
+            color: var(--white);
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-arrow:hover {
+            background: var(--dark-blue);
+            transform: scale(1.1);
+        }
+
+        .nav-arrow:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        .slide-counter {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark-blue);
+        }
+
+        .slides-wrapper {
+            position: relative;
+            min-height: 600px;
+        }
+
+        .slide {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .slide.active {
+            display: block;
+            opacity: 1;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .slide-content {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 2rem 2.5rem;
+            box-shadow: 0 10px 40px rgba(0, 31, 63, 0.1);
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        /* Cover Slide */
+        .cover-slide {
+            text-align: center;
+            background: linear-gradient(135deg, var(--dark-blue) 0%, #003366 100%);
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cover-visual {
+            position: relative;
+            height: 200px;
+            margin-bottom: 3rem;
+        }
+
+        .cover-circles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--turquoise);
+            position: relative;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .circle-1 {
+            background: rgba(0, 168, 232, 0.1);
+            animation-delay: 0s;
+        }
+
+        .circle-2 {
+            width: 150px;
+            height: 150px;
+            background: rgba(0, 168, 232, 0.15);
+            animation-delay: 0.5s;
+        }
+
+        .circle-3 {
+            background: rgba(0, 168, 232, 0.1);
+            animation-delay: 1s;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        .cover-data-points {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .data-point {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--turquoise);
+            border-radius: 50%;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .dp-1 {
+            top: 20%;
+            left: 15%;
+            animation-delay: 0s;
+        }
+
+        .dp-2 {
+            top: 60%;
+            left: 25%;
+            animation-delay: 0.8s;
+        }
+
+        .dp-3 {
+            top: 30%;
+            right: 20%;
+            animation-delay: 1.2s;
+        }
+
+        .dp-4 {
+            top: 70%;
+            right: 30%;
+            animation-delay: 1.6s;
+        }
+
+        .dp-5 {
+            top: 45%;
+            left: 50%;
+            animation-delay: 2s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .cover-title {
+            font-size: 5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            letter-spacing: 3px;
+        }
+
+        .cover-subtitle {
+            font-size: 1.8rem;
+            font-weight: 400;
+            color: var(--turquoise);
+        }
+
+        .ai-neural-network {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.15;
+            width: 200px;
+            height: 200px;
+        }
+
+        .neural-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .neural-line {
+            stroke: var(--turquoise);
+            stroke-width: 1.5;
+            opacity: 0.6;
+            animation: pulse-line 3s ease-in-out infinite;
+        }
+
+        .neural-node {
+            fill: var(--turquoise);
+            animation: pulse-node 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-line {
+            0%, 100% {
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        @keyframes pulse-node {
+            0%, 100% {
+                r: 6;
+                opacity: 0.8;
+            }
+            50% {
+                r: 8;
+                opacity: 1;
+            }
+        }
+
+        /* Slide Title */
+        .slide-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark-blue);
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .slide-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            right: 50%;
+            transform: translateX(50%);
+            width: 80px;
+            height: 3px;
+            background: var(--turquoise);
+            border-radius: 2px;
+        }
+
+        /* Chart Styles */
+        .chart-wrapper-medium {
+            width: 90%;
+            max-width: 1100px;
+            height: 400px;
+            margin: 0 auto 1.5rem;
+            padding: 2rem;
+            background: var(--white);
+            border-radius: 12px;
+            border: 2px solid var(--light-gray);
+        }
+
+        .chart-insights {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .insight-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .insight-label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .insight-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--turquoise);
+        }
+
+        /* Compact Metrics Grid */
+        .metrics-grid-compact {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .metric-card-compact {
+            background: var(--light-gray);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-top: 3px solid var(--turquoise);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card-compact:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 168, 232, 0.2);
+            background: var(--white);
+        }
+
+        .metric-icon-small {
+            font-size: 2rem;
+            color: var(--turquoise);
+            margin-bottom: 1rem;
+        }
+
+        .metric-number-compact {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--dark-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label-compact {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        /* Info Slide */
+        .info-slide {
+            background: var(--white);
+        }
+
+        .info-grid-compact {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-section {
+            background: var(--light-gray);
+            padding: 2rem;
+            border-radius: 12px;
+            border-top: 3px solid var(--turquoise);
+        }
+
+        .info-section h3 {
+            font-size: 1.3rem;
+            color: var(--dark-blue);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-section h3 i {
+            color: var(--turquoise);
+        }
+
+        .info-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-list li {
+            padding: 0.8rem 0;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+            border-bottom: 1px solid rgba(0, 31, 63, 0.1);
+        }
+
+        .info-list li:last-child {
+            border-bottom: none;
+        }
+
+        .info-bullet {
+            color: var(--turquoise);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .info-footer {
+            background: linear-gradient(135deg, var(--dark-blue) 0%, #003366 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .info-contact {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .info-contact p {
+            color: var(--white);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-contact i {
+            color: var(--turquoise);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .info-grid-compact {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-grid-compact {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .chart-wrapper-medium {
+                width: 100%;
+                height: 350px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .cover-title {
+                font-size: 2.5rem;
+            }
+
+            .cover-subtitle {
+                font-size: 1.3rem;
+            }
+
+            .slide-title {
+                font-size: 1.5rem;
+            }
+
+            .metrics-grid-compact {
+                grid-template-columns: 1fr;
+            }
+
+            .slide-content {
+                padding: 1.5rem;
+                min-height: 450px;
+            }
+
+            .chart-wrapper-medium {
+                height: 280px;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Presentation View -->
+    <div id="presentation-view" class="view-container active">
+        <div class="presentation-container">
+            <!-- Slide Navigation -->
+            <div class="slide-navigation">
+                <button class="nav-arrow" id="prevSlide"><i class="fas fa-chevron-right"></i></button>
+                <div class="slide-counter">
+                    <span id="currentSlide">1</span> / <span id="totalSlides">5</span>
+                </div>
+                <button class="nav-arrow" id="nextSlide"><i class="fas fa-chevron-left"></i></button>
+            </div>
+
+            <!-- Slides -->
+            <div class="slides-wrapper">
+                <!-- Slide 1: Cover -->
+                <div class="slide active" data-slide="1">
+                    <div class="slide-content cover-slide">
+                        <div class="cover-visual">
+                            <div class="cover-circles">
+                                <div class="circle circle-1"></div>
+                                <div class="circle circle-2"></div>
+                                <div class="circle circle-3"></div>
+                            </div>
+                            <div class="cover-data-points">
+                                <div class="data-point dp-1"></div>
+                                <div class="data-point dp-2"></div>
+                                <div class="data-point dp-3"></div>
+                                <div class="data-point dp-4"></div>
+                                <div class="data-point dp-5"></div>
+                            </div>
+                            <div class="ai-neural-network">
+                                <svg class="neural-svg" viewBox="0 0 200 200">
+                                    <line class="neural-line" x1="50" y1="50" x2="150" y2="50" />
+                                    <line class="neural-line" x1="50" y1="100" x2="150" y2="100" />
+                                    <line class="neural-line" x1="50" y1="150" x2="150" y2="150" />
+                                    <line class="neural-line" x1="50" y1="50" x2="150" y2="100" />
+                                    <line class="neural-line" x1="50" y1="100" x2="150" y2="50" />
+                                    <circle class="neural-node" cx="50" cy="50" r="6" />
+                                    <circle class="neural-node" cx="50" cy="100" r="6" />
+                                    <circle class="neural-node" cx="50" cy="150" r="6" />
+                                    <circle class="neural-node" cx="150" cy="50" r="6" />
+                                    <circle class="neural-node" cx="150" cy="100" r="6" />
+                                    <circle class="neural-node" cx="150" cy="150" r="6" />
+                                </svg>
+                            </div>
+                        </div>
+                        <h1 class="cover-title">FinAI</h1>
+                        <h2 class="cover-subtitle">ניתוח מדדים סטטיסטיים</h2>
+                    </div>
+                </div>
+
+                <!-- Slide 2: Growth Chart -->
+                <div class="slide" data-slide="2">
+                    <div class="slide-content">
+                        <h2 class="slide-title">צמיחת בסיס לקוחות - 2025</h2>
+                        <div class="chart-wrapper-medium">
+                            <canvas id="growthChart"></canvas>
+                        </div>
+                        <div class="chart-insights">
+                            <div class="insight-item">
+                                <span class="insight-label">צמיחה חודשית ממוצעת:</span>
+                                <span class="insight-value">+23%</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">סה"כ לקוחות חדשים:</span>
+                                <span class="insight-value">2,000+</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 3: Services Usage -->
+                <div class="slide" data-slide="3">
+                    <div class="slide-content">
+                        <h2 class="slide-title">פילוח שימוש בשירותים פיננסיים</h2>
+                        <div class="chart-wrapper-medium">
+                            <canvas id="servicesChart"></canvas>
+                        </div>
+                        <div class="chart-insights">
+                            <div class="insight-item">
+                                <span class="insight-label">לקוחות עם 2+ שירותים:</span>
+                                <span class="insight-value">47%</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">שביעות רצון ממוצעת:</span>
+                                <span class="insight-value">4.8/5</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 4: Key Metrics -->
+                <div class="slide" data-slide="4">
+                    <div class="slide-content">
+                        <h2 class="slide-title">מדדי ביצוע מרכזיים</h2>
+                        <div class="metrics-grid-compact">
+                            <div class="metric-card-compact">
+                                <div class="metric-icon-small">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="metric-number-compact">2,000+</div>
+                                <div class="metric-label-compact">לקוחות פעילים</div>
+                            </div>
+                            <div class="metric-card-compact">
+                                <div class="metric-icon-small">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <div class="metric-number-compact">4.8/5</div>
+                                <div class="metric-label-compact">דירוג שביעות רצון</div>
+                            </div>
+                            <div class="metric-card-compact">
+                                <div class="metric-icon-small">
+                                    <i class="fas fa-shekel-sign"></i>
+                                </div>
+                                <div class="metric-number-compact">₪18,500</div>
+                                <div class="metric-label-compact">חיסכון ממוצע ללקוח</div>
+                            </div>
+                            <div class="metric-card-compact">
+                                <div class="metric-icon-small">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="metric-number-compact">2.3</div>
+                                <div class="metric-label-compact">ימים לחיבור למומחה</div>
+                            </div>
+                            <div class="metric-card-compact">
+                                <div class="metric-icon-small">
+                                    <i class="fas fa-percentage"></i>
+                                </div>
+                                <div class="metric-number-compact">68%</div>
+                                <div class="metric-label-compact">שיעור חזרה לפלטפורמה</div>
+                            </div>
+                            <div class="metric-card-compact">
+                                <div class="metric-icon-small">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="metric-number-compact">+23%</div>
+                                <div class="metric-label-compact">צמיחה חודשית בכמות לקוחות</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 5: Info Summary -->
+                <div class="slide" data-slide="5">
+                    <div class="slide-content info-slide">
+                        <h2 class="slide-title">סיכום - FinAI במספרים</h2>
+                        <div class="info-grid-compact">
+                            <div class="info-section">
+                                <h3><i class="fas fa-database"></i> מדדי ביצוע מרכזיים</h3>
+                                <ul class="info-list">
+                                    <li><span class="info-bullet">•</span> 2,000+ לקוחות פעילים בפלטפורמה</li>
+                                    <li><span class="info-bullet">•</span> דירוג שביעות רצון: 4.8/5 (96%)</li>
+                                    <li><span class="info-bullet">•</span> חיסכון ממוצע: ₪18,500 לשנה ללקוח</li>
+                                    <li><span class="info-bullet">•</span> זמן חיבור למומחה: 2.3 ימים בממוצע</li>
+                                </ul>
+                            </div>
+                            <div class="info-section">
+                                <h3><i class="fas fa-chart-bar"></i> נתוני צמיחה</h3>
+                                <ul class="info-list">
+                                    <li><span class="info-bullet">•</span> צמיחה חודשית: +23% בממוצע</li>
+                                    <li><span class="info-bullet">•</span> שיעור חזרה (Retention): 68%</li>
+                                    <li><span class="info-bullet">•</span> 47% מהלקוחות משתמשים ב-2+ שירותים פיננסיים</li>
+                                    <li><span class="info-bullet">•</span> שביעות רצון לקוחות רב-שירותיים: פי 2.1 גבוהה יותר</li>
+                                </ul>
+                            </div>
+                            <div class="info-section">
+                                <h3><i class="fas fa-handshake"></i> תחומי התמחות מרכזיים</h3>
+                                <ul class="info-list">
+                                    <li><span class="info-bullet">•</span> תכנון פיננסי משפחתי ואישי</li>
+                                    <li><span class="info-bullet">•</span> ליווי ברכישת נדל"ן</li>
+                                    <li><span class="info-bullet">•</span> ביטוח בריאות</li>
+                                    <li><span class="info-bullet">•</span> החזרי מס</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="info-footer">
+                            <div class="info-contact">
+                                <p><i class="fas fa-envelope"></i> info@myfinai.co.il</p>
+                                <p><i class="fas fa-globe"></i> myfinai.co.il</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Presentation Slide Navigation
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevSlide');
+        const nextBtn = document.getElementById('nextSlide');
+        const currentSlideEl = document.getElementById('currentSlide');
+        const totalSlidesEl = document.getElementById('totalSlides');
+
+        let currentSlide = 1;
+        const totalSlides = slides.length;
+
+        totalSlidesEl.textContent = totalSlides;
+
+        function updateSlide() {
+            slides.forEach(slide => {
+                slide.classList.remove('active');
+            });
+            
+            slides[currentSlide - 1].classList.add('active');
+            currentSlideEl.textContent = currentSlide;
+            
+            prevBtn.disabled = currentSlide === 1;
+            nextBtn.disabled = currentSlide === totalSlides;
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlide();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateSlide();
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                if (currentSlide < totalSlides) {
+                    currentSlide++;
+                    updateSlide();
+                }
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                if (currentSlide > 1) {
+                    currentSlide--;
+                    updateSlide();
+                }
+            }
+        });
+
+        // Initialize Growth Chart (Slide 2)
+        function initGrowthChart() {
+            const ctx = document.getElementById('growthChart');
+            if (!ctx) return;
+
+            const labels = ['01/01', '01/02', '01/03', '01/04', '01/05', '01/06', 
+                            '01/07', '01/08', '01/09', '01/10', '01/11'];
+            
+            const data = [78, 134, 217, 348, 542, 798, 1123, 1487, 1782, 1964, 2047];
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'סה"כ לקוחות פעילים',
+                        data: data,
+                        borderColor: '#00A8E8',
+                        backgroundColor: 'rgba(0, 168, 232, 0.25)',
+                        borderWidth: 5,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 8,
+                        pointBackgroundColor: '#00A8E8',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 3,
+                        pointHoverRadius: 11
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            rtl: true,
+                            labels: {
+                                font: {
+                                    size: 16,
+                                    family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+                                    weight: '600'
+                                },
+                                color: '#001F3F',
+                                usePointStyle: true,
+                                padding: 25
+                            }
+                        },
+                        tooltip: {
+                            rtl: true,
+                            backgroundColor: '#001F3F',
+                            titleFont: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 15
+                            },
+                            padding: 14,
+                            cornerRadius: 10,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y.toLocaleString() + ' לקוחות';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'כמות לקוחות',
+                                font: {
+                                    size: 15,
+                                    weight: 'bold'
+                                },
+                                color: '#001F3F',
+                                padding: 15
+                            },
+                            grid: {
+                                color: 'rgba(0, 31, 63, 0.12)',
+                                lineWidth: 1.5
+                            },
+                            ticks: {
+                                font: {
+                                    size: 14
+                                },
+                                color: '#5A6C7D',
+                                padding: 10,
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'תאריך (2025)',
+                                font: {
+                                    size: 15,
+                                    weight: 'bold'
+                                },
+                                color: '#001F3F',
+                                padding: 15
+                            },
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 13
+                                },
+                                color: '#5A6C7D',
+                                padding: 8
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize Services Chart (Slide 3)
+        function initServicesChart() {
+            const ctx = document.getElementById('servicesChart');
+            if (!ctx) return;
+
+            const labels = ['תכנון פיננסי', 'ייעוץ משכנתאות', 'ביטוח בריאות', 
+                            'החזרי מס', 'ליווי דירות יד 2', 'ליווי פריסייל'];
+            const data = [1247, 945, 823, 612, 534, 387];
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'מספר לקוחות',
+                        data: data,
+                        backgroundColor: [
+                            'rgba(0, 168, 232, 0.85)',
+                            'rgba(0, 168, 232, 0.75)',
+                            'rgba(0, 168, 232, 0.65)',
+                            'rgba(0, 168, 232, 0.55)',
+                            'rgba(0, 168, 232, 0.45)',
+                            'rgba(0, 168, 232, 0.35)'
+                        ],
+                        borderColor: '#00A8E8',
+                        borderWidth: 2,
+                        borderRadius: 10,
+                        barThickness: 70
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            rtl: true,
+                            backgroundColor: '#001F3F',
+                            titleFont: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 15
+                            },
+                            padding: 14,
+                            cornerRadius: 10,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y.toLocaleString() + ' לקוחות';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'מספר לקוחות',
+                                font: {
+                                    size: 15,
+                                    weight: 'bold'
+                                },
+                                color: '#001F3F',
+                                padding: 15
+                            },
+                            grid: {
+                                color: 'rgba(0, 31, 63, 0.12)',
+                                lineWidth: 1.5
+                            },
+                            ticks: {
+                                font: {
+                                    size: 14
+                                },
+                                color: '#5A6C7D',
+                                padding: 10,
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 13,
+                                    weight: '600'
+                                },
+                                color: '#5A6C7D',
+                                padding: 10
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Watch for slides to become active and init charts
+        const slideObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.target.classList.contains('active')) {
+                    const slideNum = mutation.target.getAttribute('data-slide');
+                    if (slideNum === '2') {
+                        setTimeout(initGrowthChart, 100);
+                    } else if (slideNum === '3') {
+                        setTimeout(initServicesChart, 100);
+                    }
+                }
+            });
+        });
+
+        slides.forEach(slide => {
+            slideObserver.observe(slide, { attributes: true, attributeFilter: ['class'] });
+        });
+
+        // Initialize
+        updateSlide();
+    </script>
+</body>
+</html>
